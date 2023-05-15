@@ -1,0 +1,5 @@
+If a WebGL program is not working, the first thing you should check is whether all of the required files are being loaded properly.
+
+WebGL 的所有加载文件是否加载完毕
+
+
