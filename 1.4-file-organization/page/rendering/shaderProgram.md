@@ -11,7 +11,6 @@
 - varying 
 
 
-// TODO: http://learnwebgl.brown37.net/rendering/introduction.html#rendering-steps 
 渲染速度：
 - 减小渲染上下文的切换
 
