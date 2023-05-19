@@ -22,20 +22,27 @@ function createFragmentShader(gl, sourceCode) {
 }
 
 let vertexShaderSource = `
-    
-    void main(){
-        gl_Position = u_Transform * vec4(a_Vertex, 1.0)
-        v_vertex_color = vec4(u_Color, 1.0)
+    precision mediump int;
+    precision mediump float;
+    uniform mat4 u_Transform;
+    attribute vec3 a_Vertex;
+    void main() {
+        gl_Position = vec4(a_Vertex, 1.0);
     }
 `;
 
 let fragmentShaderSource = `
-
+    precision mediump int;
+    precision mediump float;
+    uniform vec4 u_Color;
+    void main() {
+      gl_FragColor = u_Color; 
+    }
 `;
 function createProgram(gl) {
   let program = gl.createProgram();
-  gl.attachShader(program, {});
-  gl.attachShader(program, {});
+  gl.attachShader(program, createVertexShader(gl, vertexShaderSource));
+  gl.attachShader(program, createFragmentShader(gl, fragmentShaderSource));
   gl.linkProgram(program);
 
   var success = gl.getProgramParameter(program, gl.LINK_STATUS);
@@ -43,12 +50,12 @@ function createProgram(gl) {
     return program;
   }
 
-  console.log(gl.getProgramInfoLog(program));
   gl.deleteProgram(program);
 }
 function createTriangle(model) {
   let gl = document.querySelector("#triangleContainer").getContext("webgl");
   let program = createProgram(gl);
+  gl.useProgram(program);
 
   let number_triangles = 0;
   let triangles_vertex_buffer_id = null;
@@ -96,7 +103,7 @@ function createTriangle(model) {
 
   function _getLocationOfShaderVariables() {
     u_Color_location = gl.getUniformLocation(program, "u_Color");
-    u_Transform_location = gl.getUniformLocation(program, "u_Transform");
+    // u_Transform_location = gl.getUniformLocation(program, "u_Transform");
     a_Vertex_location = gl.getAttribLocation(program, "a_Vertex");
   }
 
@@ -111,7 +118,30 @@ function createTriangle(model) {
 
   function render() {
     var j, start;
+
+    // let matrix = new Float32Array(16).fill(0.0);
+    // matrix[0] = 1.0;
+
+    // gl.uniformMatrix4fv(u_Transform_location, false, matrix);
+    gl.uniform4fv(u_Color_location, new Float32Array([1.0, 0.0, 0.0, 1.0]));
+    gl.viewport(0, 0, 500, 400);
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangles_vertex_buffer_id);
+
+    gl.vertexAttribPointer(a_Vertex_location, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_Vertex_location);
+
+    gl.drawArrays(gl.TRIANGLES, 0, number_triangles * 3);
+
+    // Set the color for all of the edges
+    gl.uniform4fv(u_Color_location, new Float32Array([1.0, 0.0, 0.0, 1.0]));
+
+    // Draw a line_loop around each of the triangles
+    for (j = 0, start = 0; j < number_triangles; j += 1, start += 3) {
+      gl.drawArrays(gl.LINE_LOOP, start, 3);
+    }
   }
+
+  render();
 }
 
 let model = CreatePyramid();
